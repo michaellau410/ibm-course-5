@@ -1,0 +1,49 @@
+==================================================================================
+PHASE 1: STARTUP & CONFIGURATION LEVEL (Pre-loaded at the very beginning)
+==================================================================================
+
+ [ src/features/cart/cartSlice.js ]     ──┐
+  (The Machine/Factory)                    │
+  • Holds initial layout: { cartItems: [] } │
+  • Defines the recipes (reducers)         │
+                                           ├─► Loaded & Combined Into:
+ [ src/features/auth/authSlice.js ]     ──┤
+  (Another Feature Machine)                │
+                                           │
+                                           ▼
+                                ┌──────────────────────┐
+                                │   src/app/store.js   │
+                                │   (The Central Hub)  │
+                                └──────────┬───────────┘
+                                           │
+                                           ▼ Injected into:
+                                ┌──────────────────────┐
+                                │     src/main.jsx     │
+                                │  <Provider store>    │
+                                └──────────────────────┘
+                                  (The Global Highway)
+
+==================================================================================
+PHASE 2: RUNTIME UI LEVEL (User interacting with the HTML elements)
+==================================================================================
+
+        [ ProductCard.jsx (HTML UI) ]
+                     │
+                     │ 1. Drops "Order Ticket" via useDispatch()
+                     │    e.g., dispatch(addItemToCart(shoe))
+                     ▼
+        ┌──────────────────────────┐
+        │     src/app/store.js     │◄── (Catches the ticket, reads the type,
+        └────────────┬─────────────┘     and routes it to the pre-loaded slice)
+                     │
+                     │ 2. Routes payload data down
+                     ▼
+        ┌──────────────────────────┐
+        │ src/features/cart/cartSlice.js ◄── (The Chef runs the code recipe
+        └────────────┬─────────────┘         and updates the data pool)
+                     │
+                     │ 3. Automatically streams updated data pool
+                     ▼
+        [ ShoppingCart.jsx (HTML UI) ]
+          • Uses useSelector(state => state.cart.cartItems)
+          • Constantly listens to the store pool and re-renders the HTML!
